@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SESOI Decisions - Statistical Tools for Practical Relevance</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Load Chart.js and Chart.js Annotation Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+
+  <!-- --- SIDEBAR --- -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SESOI Decisions</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li class="menu-item active" id="menu-intro" onclick="switchMainTab('Intro')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        Introduction
+      </li>
+      <li class="menu-item" id="menu-singlefreq" onclick="switchMainTab('SingleFreq')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        Single (Frequentist)
+      </li>
+      <li class="menu-item" id="menu-singlebayes" onclick="switchMainTab('SingleBayes')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        Single (Bayesian)
+      </li>
+      <li class="menu-item" id="menu-meta" onclick="switchMainTab('Meta')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M22 12H2"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        Meta-Analytic
+      </li>
+    </ul>
+  </aside>
+
+  <!-- --- MAIN WORKSPACE AREA --- -->
+  <main class="main-content">
+    <header class="app-header">
+      <div class="app-title" id="page-header-title">Introduction</div>
+      <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()">
+        <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <span id="theme-text">Dark Mode</span>
+      </button>
+    </header>
+
+    <div class="content-body">
+
+      <!-- ==================== TAB 1: INTRODUCTION ==================== -->
+      <section class="tab-container active" id="tab-Intro">
+        <div class="card">
+          <h2 class="card-title">About Inconclusive Evidence</h2>
+          <div class="inner-tab-content active">
+            <p style="text-align: justify; margin-bottom: 16px; line-height: 1.65;">
+              This web application is designed for the article by Riesthuis et al. (2026) titled <a href="https://osf.io/tsjgh_v1" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: underline;"><i>“Decisions under Uncertainty: A Statistical Framework for Evaluating Practical Relevance in Interval-Based Hypothesis Testing”</i></a>. 
+              The framework focuses on the possible outcomes when researchers set a <b>Smallest Effect Size of Interest (SESOI)</b> (or a minimally meaningful effect size, MMES) and conduct interval-based hypothesis tests. Specifically, it addresses the potential outcome wherein the practical relevance of an observed effect (e.g., mean difference) is inconclusive.
+            </p>
+            <p style="text-align: justify; margin-bottom: 16px; line-height: 1.65;">
+              <b>What is a SESOI?</b> The SESOI defines the numerical threshold between effects that are practically meaningful and those that are trivial or negligible. In an interval-based framework, researchers define a lower bound (SESOI<sub>lower</sub>) and an upper bound (SESOI<sub>upper</sub>). An effect is declared <i>practically meaningful</i> if its entire confidence interval falls outside the SESOI range, and <i>practically equivalent</i> if its entire confidence interval falls strictly within the SESOI range.
+            </p>
+            <p style="text-align: justify; margin-bottom: 16px; line-height: 1.65;">
+              <b>Illustrative Example (SESOI set to [-5, 5]):</b> In the example shown below, the SESOI is defined as <b>[-5, 5]</b> (a lower bound of <b>-5</b> and an upper bound of <b>+5</b>):
+            </p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.65; display: flex; flex-direction: column; gap: 8px;">
+              <li><b>Inconclusive Outcome 1 (Point Estimate = 5.5, SD = 0.75):</b> The observed mean difference is 5.5 with a 95% CI [4.0, 7.0] and a 90% CI [4.5, 6.5]. Although the point estimate is greater than the upper SESOI bound of 5, both confidence intervals overlap with 5, meaning we cannot definitively claim practical relevance at the 90% or 95% level.</li>
+              <li><b>Inconclusive Outcome 2 (Point Estimate = 4.5, SD = 0.75):</b> The observed mean difference is 4.5 with a 95% CI [3.0, 6.0] and a 90% CI [3.5, 5.5]. Although the point estimate is inside the equivalence boundary of 5, the 90% CI [3.5, 5.5] crosses the upper SESOI bound of 5, meaning we cannot claim practical equivalence either.</li>
+            </ul>
+            
+            <!-- Dynamic interactive overlay instruction -->
+            <p class="help-text" style="margin-top: 10px; margin-bottom: 12px; font-weight: 600; color: var(--primary);">
+              💡 <b>Interactive Plot:</b> Hover your cursor horizontally across the plot below to dynamically test different mean differences. Note that declaring practical significance requires the <b>95% CI</b> to exclude the SESOI in a two-tailed test, or the <b>90% CI</b> in a one-tailed test (while equivalence testing uses the <b>90% CI</b>).
+            </p>
+
+            <div class="plot-box">
+              <canvas id="IntroDemoPlot" class="plot-canvas" style="max-height: 480px; cursor: crosshair;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Application Purpose</h2>
+          <p style="text-align: justify; margin-bottom: 24px; line-height: 1.6;">
+            The purpose of this application is to provide researchers with tools to quantify the associated errors and robustness of minimum-effect and equivalence test results, guiding decision-making in situations of uncertainty. This app allows you to provide an estimate and standard error (or sample size + SD) and receive intuitive interpretations. Please refer to Riesthuis et al. (2026) for a more detailed description of these concepts and methods.
+          </p>
+          
+          <div class="table-responsive">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th>Tool</th>
+                  <th>Aim</th>
+                </tr>
+              </thead>
+              <tbody id="intro-info-table-body">
+                <!-- Filled dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- How to Cite This Work Card with Dropdown Selection -->
+        <div class="card">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            How to Cite This Work
+          </h2>
+          <p style="margin-bottom: 16px; line-height: 1.6; color: var(--text-color);">
+            If you use this statistical framework, methods, or web application in your research, please cite the paper:
+          </p>
+          
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <label for="citation-style-select" style="font-weight: 700; font-size: 0.88rem; color: var(--primary);">Citation Style:</label>
+              <select id="citation-style-select" onchange="onCitationStyleChange()" style="width: auto; min-width: 190px; padding: 6px 12px; font-weight: 500;">
+                <option value="apa" selected>APA (7th Edition)</option>
+                <option value="chicago">Chicago (Author-Date)</option>
+                <option value="harvard">Harvard</option>
+                <option value="mla">MLA (9th Edition)</option>
+                <option value="vancouver">Vancouver</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary" onclick="copyActiveCitation(this)" style="padding: 7px 14px; font-size: 0.84rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Copy Citation</span>
+            </button>
+          </div>
+
+          <div class="citation-display-box" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px 20px;">
+            <p id="citation-text-display" style="font-size: 0.94rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+              Riesthuis, P., Cribbie, R. A., Celio, V., & Beribisky, N. (2026). Decisions under Uncertainty: A Statistical Framework for Evaluating Practical Relevance in Interval-Based Hypothesis Testing. <i>OSF Preprints</i>. https://osf.io/tsjgh_v1
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: SINGLE ESTIMATES (FREQUENTIST) ==================== -->
+      <section class="tab-container" id="tab-SingleFreq">
+        
+        <!-- Collapsible Top Instructional Card: Frequentist Interval Testing & Sensitivity Guide -->
+        <div class="card collapsible-card" style="border-left: 4px solid var(--primary); background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.02) 100%);">
+          <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            <h2 class="card-title" style="color: var(--primary); margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              Frequentist CI-Based Decisions & Sensitivity Guide
+            </h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="collapsible-badge">Show Instructions</span>
+              <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+          <div class="collapsible-body" style="display: none; font-size: 0.94rem; line-height: 1.65; color: var(--text-color);">
+            <p style="margin-bottom: 10px;">
+              <b>How to evaluate practical relevance and test robustness under frequentist estimation:</b>
+            </p>
+            <ul style="padding-left: 20px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 8px;">
+              <li><b>1. Enter Observed Estimate & Uncertainty:</b> Input your sample effect size (e.g. mean difference) and provide either the Standard Error (SE) directly or the sample size (N) and standard deviation (SD).</li>
+              <li><b>2. Choose Test Type & SESOI Boundaries:</b> Select whether you are testing for practical significance (<i>Minimum-Effect Test</i>) or practical equivalence (<i>Equivalence Test</i>), specify hypothesis tail direction, and define your Smallest Effect Size of Interest (SESOI lower and upper bounds).</li>
+              <li><b>3. Specify Custom Alpha & Replication Sample Size:</b> Set your nominal Type I error rate (&alpha;, e.g. 0.050) and the sample size planned for a hypothetical replication study.</li>
+              <li><b>4. Interpret Decisions & Robustness:</b>
+                <ul style="padding-left: 18px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+                  <li><b>Threshold Alpha:</b> The exact maximum Type I error rate required to conclude practical relevance or equivalence.</li>
+                  <li><b>Robustness Index:</b> The factor by which your standard error or sample size would need to change to alter the practical conclusion.</li>
+                  <li><b>Replication Probability:</b> The probability that a future replication study will successfully demonstrate practical relevance.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Step 1: Inputs & Parameters (Full Width Card) -->
+        <div class="card">
+          <div class="form-section">
+            
+            <!-- 3-Column Layout for core inputs -->
+            <div class="form-card-sub">
+              <div class="form-card-sub-title">1. Observed Study Settings</div>
+              <div class="form-grid-3">
+                <div class="input-group">
+                  <label for="sf-observed-effect" class="has-tooltip">
+                    Observed Effect <span class="info-icon">i</span>
+                    <span class="tooltip-text">The estimated raw effect size from your sample data (e.g. mean difference).</span>
+                  </label>
+                  <input type="number" id="sf-observed-effect" value="1.15" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                  <label class="has-tooltip">
+                    Provide Uncertainty <span class="info-icon">i</span>
+                    <span class="tooltip-text">Choose Standard Error directly, or supply Sample Size & Standard Deviation.</span>
+                  </label>
+                  <div class="radio-group">
+                    <div class="radio-btn-card active" id="btn-sf-se-mode-se" onclick="toggleSFSEMode('se')">
+                      <input type="radio" name="sf-se-mode" value="se" checked>Standard Error
+                    </div>
+                    <div class="radio-btn-card" id="btn-sf-se-mode-nsd" onclick="toggleSFSEMode('n_sd')">
+                      <input type="radio" name="sf-se-mode" value="n_sd">Sample Size & SD
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="input-group" id="group-sf-se">
+                  <label for="sf-se" class="has-tooltip">
+                    Standard Error <span class="info-icon">i</span>
+                    <span class="tooltip-text">The standard error of your observed estimate.</span>
+                  </label>
+                  <input type="number" id="sf-se" value="0.15" step="0.01" min="0">
+                </div>
+                
+                <div class="input-group" id="group-sf-n-sd" style="display:none;">
+                  <label for="sf-n" class="has-tooltip">
+                    Sample Size <span class="info-icon">i</span>
+                    <span class="tooltip-text">The sample size of your study group.</span>
+                  </label>
+                  <input type="number" id="sf-n" value="50" step="1" min="2">
+                  <label for="sf-sd" style="margin-top: 8px;" class="has-tooltip">
+                    Standard Deviation <span class="info-icon">i</span>
+                    <span class="tooltip-text">The standard deviation of your sample group.</span>
+                  </label>
+                  <input type="number" id="sf-sd" value="1.0" step="0.01" min="0.001">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sf-test-type" class="has-tooltip">
+                    Test Type <span class="info-icon">i</span>
+                    <span class="tooltip-text">Interval test type: Minimum-Effect Test or Equivalence Test.</span>
+                  </label>
+                  <select id="sf-test-type" onchange="onSFTestTypeChange()">
+                    <option value="Minimum-Effect Test">Minimum-Effect Test</option>
+                    <option value="Equivalence Test">Equivalence Test</option>
+                  </select>
+                </div>
+                
+                <div class="input-group" id="group-sf-tail-type">
+                  <label class="has-tooltip">
+                    Tail Type <span class="info-icon">i</span>
+                    <span class="tooltip-text">One-tailed (directional upper or lower bounds) or two-tailed hypothesis.</span>
+                  </label>
+                  <select id="sf-tail-type">
+                    <option value="two">Two-Tailed</option>
+                    <option value="upper">One-Tailed (Upper)</option>
+                    <option value="lower">One-Tailed (Lower)</option>
+                  </select>
+                </div>
+                
+                <div class="input-group">
+                  <label for="sf-custom-alpha" class="has-tooltip">
+                    Type I Error Rate (Alpha) <span class="info-icon">i</span>
+                    <span class="tooltip-text">Nominal Type I error rate (significance level) used in the study.</span>
+                  </label>
+                  <input type="number" id="sf-custom-alpha" value="0.05" step="0.005" min="0.001" max="0.5">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sf-sesoi-lower" class="has-tooltip">
+                    SESOI Lower Bound <span class="info-icon">i</span>
+                    <span class="tooltip-text">The lower bound of the Smallest Effect Size of Interest (SESOI) interval.</span>
+                  </label>
+                  <input type="number" id="sf-sesoi-lower" value="-1.0" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sf-sesoi-upper" class="has-tooltip">
+                    SESOI Upper Bound <span class="info-icon">i</span>
+                    <span class="tooltip-text">The upper bound of the Smallest Effect Size of Interest (SESOI) interval.</span>
+                  </label>
+                  <input type="number" id="sf-sesoi-upper" value="1.0" step="0.01">
+                </div>
+              </div>
+            </div>
+            
+            <!-- 3-Column layout for replication parameters -->
+            <div class="form-card-sub">
+              <div class="form-card-sub-title">2. Replication Study Settings</div>
+              <div class="form-grid-3">
+                <div class="input-group" id="group-sf-n-orig">
+                  <label for="sf-n-orig" class="has-tooltip">
+                    Original Sample Size <span class="info-icon">i</span>
+                    <span class="tooltip-text">The final sample size of your original study.</span>
+                  </label>
+                  <input type="number" id="sf-n-orig" value="50" step="1" min="2">
+                </div>
+                <div class="input-group">
+                  <label for="sf-n-rep" class="has-tooltip">
+                    Replication Sample Size <span class="info-icon">i</span>
+                    <span class="tooltip-text">The sample size planned for the hypothetical replication study.</span>
+                  </label>
+                  <input type="number" id="sf-n-rep" value="50" step="1" min="2">
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Stacked Step 2: Outputs (Underneath Plot) -->
+        <div class="card">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Frequentist CI-Based Output
+          </h2>
+          
+          <div class="alert-info-box" id="error-message-sf" style="display:none;"></div>
+          
+          <div class="plot-box" style="height: 400px;">
+            <canvas id="ciPlotCanvas"></canvas>
+          </div>
+          
+          <h3 style="margin-top:32px; font-size:1.1rem; font-weight:700;">Numeric Output</h3>
+          <div class="table-responsive">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th><span class="has-tooltip">Alpha (&alpha;)<span class="info-icon">i</span><span class="tooltip-text">The nominal Type I error rate (significance level) used for the confidence interval.</span></span></th>
+                  <th><span class="has-tooltip">CI Lower<span class="info-icon">i</span><span class="tooltip-text">Lower bound of the computed confidence interval.</span></span></th>
+                  <th><span class="has-tooltip">CI Upper<span class="info-icon">i</span><span class="tooltip-text">Upper bound of the computed confidence interval.</span></span></th>
+                  <th><span class="has-tooltip">Required SE for Claim<span class="info-icon">i</span><span class="tooltip-text">The standard error required for the confidence interval to exclude/include the SESOI at the chosen alpha level.</span></span></th>
+                  <th><span class="has-tooltip">Robustness Index<span class="info-icon">i</span><span class="tooltip-text">Assesses how sensitive the practical conclusion is to changes in the standard error or sample size.</span></span></th>
+                  <th><span class="has-tooltip">Replication Prob.<span class="info-icon">i</span><span class="tooltip-text">Estimates the probability that a replication study will yield a practically meaningful, practically negligible, or inconclusive outcome.</span></span></th>
+                </tr>
+              </thead>
+              <tbody id="single-ci-table-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+          
+          <h3 style="margin-top:32px; font-size:1.1rem; font-weight:700;">Interpretation</h3>
+          <div class="interpretation-box" id="single-ci-explanation">
+            <!-- Dynamic -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: SINGLE ESTIMATES (BAYESIAN) ==================== -->
+      <section class="tab-container" id="tab-SingleBayes">
+        
+        <!-- Collapsible Top Instructional Card: Bayesian Posterior & Interval Bayes Factor Guide -->
+        <div class="card collapsible-card" style="border-left: 4px solid var(--primary); background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.02) 100%);">
+          <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            <h2 class="card-title" style="color: var(--primary); margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              Bayesian Posterior & Interval Bayes Factor Guide
+            </h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="collapsible-badge">Show Instructions</span>
+              <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+          <div class="collapsible-body" style="display: none; font-size: 0.94rem; line-height: 1.65; color: var(--text-color);">
+            <p style="margin-bottom: 10px;">
+              <b>How to evaluate Bayesian posterior probabilities and evidence strength:</b>
+            </p>
+            <ul style="padding-left: 20px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 8px;">
+              <li><b>1. Enter Observed Data & Prior Distribution:</b> Provide your observed sample effect size and uncertainty (SE or Sample Size + SD), together with your prior beliefs (Prior Mean and Prior SD).</li>
+              <li><b>2. Set Test Type & SESOI Boundaries:</b> Select whether you are testing for practical significance (<i>Minimum-Effect Test</i>) or practical equivalence (<i>Equivalence Test</i>), and specify your SESOI bounds.</li>
+              <li><b>3. Observe Prior-to-Posterior Updating:</b> The plot illustrates how your prior (dashed gray curve) combines with sample likelihood to yield the posterior distribution (solid blue curve), with the shaded area showing the probability mass inside or outside the SESOI.</li>
+              <li><b>4. Interpret Posterior Metrics & Evidence:</b>
+                <ul style="padding-left: 18px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+                  <li><b>Posterior Probability:</b> The quantified posterior probability that the true effect size is practically meaningful or practically equivalent.</li>
+                  <li><b>Interval Bayes Factor (BF10 / BF01):</b> The relative evidence favoring the practical hypothesis over the alternative hypothesis based on the ratio of posterior to prior odds.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Step 1: Inputs & Parameters (Full Width Card) -->
+        <div class="card">
+          <div class="form-section">
+            
+            <div class="form-card-sub">
+              <div class="form-card-sub-title">1. Observed Study & Prior Settings</div>
+              <div class="form-grid-3">
+                <div class="input-group">
+                  <label for="sb-observed-effect" class="has-tooltip">
+                    Observed Effect <span class="info-icon">i</span>
+                    <span class="tooltip-text">The estimated raw effect size from your sample data (e.g. mean difference).</span>
+                  </label>
+                  <input type="number" id="sb-observed-effect" value="1.15" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                  <label class="has-tooltip">
+                    Provide Uncertainty <span class="info-icon">i</span>
+                    <span class="tooltip-text">Choose Standard Error directly, or supply Sample Size & Standard Deviation.</span>
+                  </label>
+                  <div class="radio-group">
+                    <div class="radio-btn-card active" id="btn-sb-se-mode-se" onclick="toggleSBSEMode('se')">
+                      <input type="radio" name="sb-se-mode" value="se" checked>Standard Error
+                    </div>
+                    <div class="radio-btn-card" id="btn-sb-se-mode-nsd" onclick="toggleSBSEMode('n_sd')">
+                      <input type="radio" name="sb-se-mode" value="n_sd">Sample Size & SD
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="input-group" id="group-sb-se">
+                  <label for="sb-se" class="has-tooltip">
+                    Standard Error <span class="info-icon">i</span>
+                    <span class="tooltip-text">The standard error of your observed estimate.</span>
+                  </label>
+                  <input type="number" id="sb-se" value="0.15" step="0.01" min="0">
+                </div>
+                
+                <div class="input-group" id="group-sb-n-sd" style="display:none;">
+                  <label for="sb-n" class="has-tooltip">
+                    Sample Size <span class="info-icon">i</span>
+                    <span class="tooltip-text">The sample size of your study group.</span>
+                  </label>
+                  <input type="number" id="sb-n" value="50" step="1" min="2">
+                  <label for="sb-sd" style="margin-top: 8px;" class="has-tooltip">
+                    Standard Deviation <span class="info-icon">i</span>
+                    <span class="tooltip-text">The standard deviation of your sample group.</span>
+                  </label>
+                  <input type="number" id="sb-sd" value="1.0" step="0.01" min="0.001">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sb-test-type" class="has-tooltip">
+                    Test Type <span class="info-icon">i</span>
+                    <span class="tooltip-text">Interval test type: Minimum-Effect Test or Equivalence Test.</span>
+                  </label>
+                  <select id="sb-test-type" onchange="onSBTestTypeChange()">
+                    <option value="Minimum-Effect Test">Minimum-Effect Test</option>
+                    <option value="Equivalence Test">Equivalence Test</option>
+                  </select>
+                </div>
+                
+                <div class="input-group" id="group-sb-tail-type">
+                  <label class="has-tooltip">
+                    Tail Type <span class="info-icon">i</span>
+                    <span class="tooltip-text">One-tailed (directional upper or lower bounds) or two-tailed hypothesis.</span>
+                  </label>
+                  <select id="sb-tail-type">
+                    <option value="two">Two-Tailed</option>
+                    <option value="upper">One-Tailed (Upper)</option>
+                    <option value="lower">One-Tailed (Lower)</option>
+                  </select>
+                </div>
+                
+                <div class="input-group">
+                  <label for="sb-sesoi-lower" class="has-tooltip">
+                    SESOI Lower Bound <span class="info-icon">i</span>
+                    <span class="tooltip-text">The lower bound of the Smallest Effect Size of Interest (SESOI) interval.</span>
+                  </label>
+                  <input type="number" id="sb-sesoi-lower" value="-1.0" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sb-sesoi-upper" class="has-tooltip">
+                    SESOI Upper Bound <span class="info-icon">i</span>
+                    <span class="tooltip-text">The upper bound of the Smallest Effect Size of Interest (SESOI) interval.</span>
+                  </label>
+                  <input type="number" id="sb-sesoi-upper" value="1.0" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sb-prior-mean" class="has-tooltip">
+                    Prior Mean <span class="info-icon">i</span>
+                    <span class="tooltip-text">The mean of the normal prior distribution.</span>
+                  </label>
+                  <input type="number" id="sb-prior-mean" value="0" step="0.1">
+                </div>
+                
+                <div class="input-group">
+                  <label for="sb-prior-sd" class="has-tooltip">
+                    Prior SD <span class="info-icon">i</span>
+                    <span class="tooltip-text">The standard deviation of the normal prior distribution.</span>
+                  </label>
+                  <input type="number" id="sb-prior-sd" value="1" step="0.1" min="0.001">
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Stacked Step 2: Outputs (Underneath Plot) -->
+        <div class="card">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Bayesian Posterior Output
+          </h2>
+          
+          <div class="alert-info-box" id="error-message-sb" style="display:none;"></div>
+          
+          <div class="plot-box" style="height: 400px;">
+            <canvas id="posteriorPlotCanvas"></canvas>
+          </div>
+          
+          <h3 style="margin-top:32px; font-size:1.1rem; font-weight:700;">Numeric Output</h3>
+          <div class="table-responsive">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th><span class="has-tooltip">Quantity <span class="info-icon">i</span><span class="tooltip-text">The estimated Bayesian statistical parameter or probability metric.</span></span></th>
+                  <th><span class="has-tooltip">Value <span class="info-icon">i</span><span class="tooltip-text">The numerical output computed from the prior distribution and sample likelihood.</span></span></th>
+                </tr>
+              </thead>
+              <tbody id="single-bayes-table-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+          
+          <h3 style="margin-top:32px; font-size:1.1rem; font-weight:700;">Interpretation</h3>
+          <div class="interpretation-box" id="single-bayes-explanation">
+            <!-- Dynamic -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: META-ANALYTIC ==================== -->
+      <section class="tab-container" id="tab-Meta">
+        
+        <!-- Collapsible Top Instructional Card: Meta-Analytic Sensitivity & Future Studies Guide -->
+        <div class="card collapsible-card" style="border-left: 4px solid var(--primary); background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.02) 100%);">
+          <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            <h2 class="card-title" style="color: var(--primary); margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              Meta-Analytic Sensitivity & Future Studies Guide
+            </h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="collapsible-badge">Show Instructions</span>
+              <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+          <div class="collapsible-body" style="display: none; font-size: 0.94rem; line-height: 1.65; color: var(--text-color);">
+            <p style="margin-bottom: 10px;">
+              <b>How to use this tool to evaluate the impact of future studies:</b>
+            </p>
+            <ul style="padding-left: 20px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 8px;">
+              <li><b>1. Enter Existing Evidence:</b> Supply the effect sizes (y), standard errors (SE), and sample sizes (N) of already published studies in the table below.</li>
+              <li><b>2. Set SESOI Boundaries:</b> Define your Smallest Effect Size of Interest (e.g., -1.0 to 1.0) on the same metric as your effect sizes.</li>
+              <li><b>3. Simulate Future Study(ies):</b> Add one or more hypothetical future studies (e.g. <i>"Future Replication"</i>) with your expected effect size and target precision (sample size/SE).</li>
+              <li><b>4. Observe Impact on Conclusions:</b> Click <b>Run Meta-Analysis</b> to inspect how adding your planned study narrows the pooled interval and whether it turns an inconclusive meta-analytic result into a practically meaningful or equivalent outcome.</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Step 1: Input & Configuration -->
+        <div class="card">
+          <div class="form-section">
+            
+            <!-- Mandatory Settings -->
+            <div class="form-card-sub">
+              <div class="form-card-sub-title">1. Global Analysis Settings</div>
+              <div class="form-grid-3">
+                <div class="input-group">
+                  <label for="m-test-type" class="has-tooltip">
+                    Test Type <span class="info-icon">i</span>
+                    <span class="tooltip-text">The type of interval based test (Minimum-Effect or Equivalence Test).</span>
+                  </label>
+                  <select id="m-test-type" onchange="onMetaTestTypeChange()">
+                    <option value="Minimum-Effect Test">Minimum-Effect Test</option>
+                    <option value="Equivalence Test">Equivalence Test</option>
+                  </select>
+                </div>
+                
+                <div class="input-group" id="m-group-tail-type">
+                  <label class="has-tooltip">
+                    Tail Type <span class="info-icon">i</span>
+                    <span class="tooltip-text">Whether you conducted a one-tailed (directional bounds) or two-tailed hypothesis.</span>
+                  </label>
+                  <select id="m-tail-type">
+                    <option value="two">Two-Tailed</option>
+                    <option value="upper">One-Tailed (Upper)</option>
+                    <option value="lower">One-Tailed (Lower)</option>
+                  </select>
+                </div>
+                
+                <div class="input-group">
+                  <label for="m-sesoi-lower" class="has-tooltip">
+                    SESOI Lower Bound <span class="info-icon">i</span>
+                    <span class="tooltip-text">The lower bound of the Smallest Effect Size of Interest (SESOI) interval.</span>
+                  </label>
+                  <input type="number" id="m-sesoi-lower" value="-1.0" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                  <label for="m-sesoi-upper" class="has-tooltip">
+                    SESOI Upper Bound <span class="info-icon">i</span>
+                    <span class="tooltip-text">The upper bound of the Smallest Effect Size of Interest (SESOI) interval.</span>
+                  </label>
+                  <input type="number" id="m-sesoi-upper" value="1.0" step="0.01">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Spreadsheet Study Entry Table -->
+            <div class="form-card-sub">
+              <div class="form-card-sub-title">2. Study Estimations Table</div>
+              <p class="help-text" style="margin-bottom: 12px;">⚠️ <b>Important:</b> Enter effect sizes and SEs on the same metric (e.g., Cohen's d, log odds ratios, etc.). The SESOI bounds must be defined on this same scale.</p>
+              
+              <div class="input-group" style="flex-direction: row; align-items: center; gap: 8px; margin-bottom: 16px;">
+                <input type="checkbox" id="m-dependent-effects" onchange="toggleDependentEffects()">
+                <label for="m-dependent-effects" class="has-tooltip" style="margin: 0;">
+                  Some effect sizes are dependent <span class="info-icon">i</span>
+                  <span class="tooltip-text">Tick this if multiple effect sizes are nested (e.g. from the same study or lab) to run a nested multilevel random-effects model.</span>
+                </label>
+              </div>
+              
+              <!-- Full-width editable table grid -->
+              <div class="table-responsive">
+                <table class="editable-table" id="meta-studies-grid">
+                  <thead>
+                    <tr id="grid-header-row">
+                      <th>Study Name</th>
+                      <th>Effect Size (y)</th>
+                      <th>Standard Error (SE)</th>
+                      <th>Sample Size (N)</th>
+                      <!-- Dynamic Group column -->
+                    </tr>
+                  </thead>
+                  <tbody id="grid-body">
+                    <!-- Filled dynamically -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="btn-row">
+                <button class="btn btn-secondary" onclick="addMetaStudyRow()">+ Add Study</button>
+                <button class="btn btn-secondary" onclick="removeLastMetaStudyRow()">- Remove Last Study</button>
+              </div>
+            </div>
+            
+            <!-- Meta Method Settings & Execute -->
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; margin-top: 10px;">
+              <div class="input-group" style="width: 320px;">
+                <label class="has-tooltip">
+                  Meta-Analysis Method <span class="info-icon">i</span>
+                  <span class="tooltip-text">Select Fixed-Effects or Random-Effects (estimated via Restricted Maximum Likelihood).</span>
+                </label>
+                <div class="radio-group">
+                  <div class="radio-btn-card active" id="btn-meta-reml" onclick="toggleMetaMethod('REML')">
+                    <input type="radio" name="meta-method" value="REML" checked>Random-Effects (REML)
+                  </div>
+                  <div class="radio-btn-card" id="btn-meta-fe" onclick="toggleMetaMethod('FE')">
+                    <input type="radio" name="meta-method" value="FE">Fixed-Effects
+                  </div>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary" style="padding: 14px 32px; font-size: 1.05rem;" onclick="runMetaAnalysisAndShow()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Run Meta-Analysis
+              </button>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Stacked Step 2: Output Panel -->
+        <div class="card" id="meta-output-card" style="display: none; margin-top: 10px;">
+          <h2 class="card-title" style="color: var(--primary);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+            Analysis Results & Forest Plot
+          </h2>
+          
+          <div class="alert-info-box" id="error-message-meta" style="display:none;"></div>
+          
+          <div class="plot-box">
+            <canvas id="forestPlotCanvas" class="plot-canvas" style="max-height: 550px;"></canvas>
+          </div>
+          
+          <h3 style="margin-top:32px; font-size:1.1rem; font-weight:700;">Pooled Statistics</h3>
+          <div class="table-responsive">
+            <table class="results-table">
+              <thead>
+                <tr id="meta-results-header">
+                  <th>Pooled Effect</th>
+                  <th>95% CI Lower</th>
+                  <th>95% CI Upper</th>
+                  <th>90% CI Lower</th>
+                  <th>90% CI Upper</th>
+                  <th>Pred. Interval Lwr</th>
+                  <th>Pred. Interval Upr</th>
+                  <th>SE</th>
+                  <th id="header-tau2-or-g">Tau²</th>
+                </tr>
+              </thead>
+              <tbody id="meta-results-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+          
+          <h3 style="margin-top:32px; font-size:1.1rem; font-weight:700;">Interpretations</h3>
+          <div class="interpretation-box" id="meta-explanation">
+            <!-- Dynamic -->
+          </div>
+        </div>
+        
+      </section>
+
+    </div>
+  </main>
+
+  <script src="stats.js"></script>
+  <script src="plots.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
