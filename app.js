@@ -376,15 +376,14 @@ function updateSingleFreqCalculations() {
   
   if (!isNaN(thresholdAlpha)) {
     const threshCI = getCI(thresholdAlpha, observedEffect, seVal, tail, testType);
-    const threshRepProb = calculateReplicationProb(observedEffect, seVal, activeNOrig, nRep, thresholdAlpha, tail, testType, sesoiLower, sesoiUpper, sfSEMode, sdVal);
     tbodyCI += `
       <tr>
         <td><span class="has-tooltip"><b>${thresholdAlpha.toFixed(4)}</b> (Threshold)<span class="info-icon">i</span><span class="tooltip-text">Quantifies the maximum nominal Type I error rate required to conclude a practically meaningful or practically negligible effect based on the observed data.</span></span></td>
         <td>${threshCI.lower.toFixed(4)}</td>
         <td>${threshCI.upper.toFixed(4)}</td>
-        <td>${seVal.toFixed(4)} (Observed SE)</td>
-        <td>1.000 (Exact Bound)</td>
-        <td>${isNaN(threshRepProb) ? "0.000" : threshRepProb.toFixed(3)}</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
       </tr>
     `;
   } else {
@@ -395,7 +394,7 @@ function updateSingleFreqCalculations() {
         <td>-</td>
         <td>-</td>
         <td>-</td>
-        <td>0.000</td>
+        <td>-</td>
       </tr>
     `;
   }
