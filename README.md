@@ -1,7 +1,7 @@
 # Decisions under Uncertainty: SESOI Decisions Web Application
 
 [![OSF Preprints](https://img.shields.io/badge/OSF-Preprint%20%26%20Materials-blue.svg)](https://osf.io/tsjgh_v1)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 An interactive web application implementing the statistical framework from **Riesthuis et al. (2026)**: *“Decisions under Uncertainty: A Statistical Framework for Evaluating Practical Relevance in Interval-Based Hypothesis Testing”*.
 
