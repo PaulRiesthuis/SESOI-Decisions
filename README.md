@@ -58,20 +58,6 @@ Using Node.js:
 npx serve .
 ```
 
----
-
-## 🌐 Deploying to GitHub Pages (Free Hosting)
-
-To make your web app accessible online for free:
-
-1. Push this repository to GitHub (see [Step-by-Step GitHub Upload](#-how-to-upload-to-github)).
-2. In your GitHub repository, go to **Settings** > **Pages** (in the left sidebar).
-3. Under **Build and deployment** > **Branch**, select `main` (or `master`) and `/ (root)`.
-4. Click **Save**.
-5. Within a few minutes, your site will be live at `https://<your-username>.github.io/<repository-name>/`.
-
----
-
 ## 📁 Repository Structure
 
 ```
