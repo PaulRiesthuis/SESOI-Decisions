@@ -54,8 +54,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// --- Mobile Navigation Drawer Toggle ---
+function toggleMobileSidebar(isOpen) {
+  const sidebar = document.getElementById('app-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  
+  const shouldOpen = (isOpen !== undefined) ? isOpen : !sidebar.classList.contains('open');
+  if (shouldOpen) {
+    sidebar.classList.add('open');
+    if (backdrop) backdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  } else {
+    sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
 // --- Tab Switching ---
 function switchMainTab(tabId) {
+  toggleMobileSidebar(false);
+  
   document.querySelectorAll('.tab-container').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
   
@@ -1021,7 +1041,7 @@ function populateIntroTable() {
   });
 }
 
-// --- Global Floating Tooltip Helper (unclipped, viewport-clamped) ---
+// --- Global Floating Tooltip Helper (unclipped, viewport-clamped, touch/click supported) ---
 function initGlobalTooltips() {
   let tooltipEl = document.getElementById('global-app-tooltip');
   if (!tooltipEl) {
@@ -1031,10 +1051,7 @@ function initGlobalTooltips() {
     document.body.appendChild(tooltipEl);
   }
 
-  document.addEventListener('mouseover', (e) => {
-    const trigger = e.target.closest('.has-tooltip');
-    if (!trigger) return;
-
+  const showTooltip = (trigger) => {
     let text = trigger.getAttribute('data-tooltip');
     if (!text) {
       const child = trigger.querySelector('.tooltip-text');
@@ -1066,14 +1083,39 @@ function initGlobalTooltips() {
 
     tooltipEl.style.top = `${top}px`;
     tooltipEl.style.left = `${left}px`;
+  };
+
+  const hideTooltip = () => {
+    if (tooltipEl) {
+      tooltipEl.style.opacity = '0';
+      tooltipEl.style.display = 'none';
+    }
+  };
+
+  document.addEventListener('mouseover', (e) => {
+    const trigger = e.target.closest('.has-tooltip');
+    if (trigger) showTooltip(trigger);
   });
 
   document.addEventListener('mouseout', (e) => {
     const trigger = e.target.closest('.has-tooltip');
-    if (!trigger) return;
-    if (tooltipEl) {
-      tooltipEl.style.opacity = '0';
-      tooltipEl.style.display = 'none';
+    if (trigger) hideTooltip();
+  });
+
+  // Tap-to-toggle on touch / mobile devices
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.has-tooltip');
+    if (trigger) {
+      if (tooltipEl.style.display === 'block' && tooltipEl._activeTrigger === trigger) {
+        hideTooltip();
+        tooltipEl._activeTrigger = null;
+      } else {
+        showTooltip(trigger);
+        tooltipEl._activeTrigger = trigger;
+      }
+    } else {
+      hideTooltip();
+      tooltipEl._activeTrigger = null;
     }
   });
 }

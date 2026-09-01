@@ -11,10 +11,16 @@
 </head>
 <body>
 
+  <!-- --- MOBILE SIDEBAR BACKDROP --- -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
+
   <!-- --- SIDEBAR --- -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="app-sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">SESOI Decisions</div>
+      <button class="sidebar-close-btn" id="sidebar-close-btn" onclick="toggleMobileSidebar(false)" aria-label="Close navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
     <ul class="sidebar-menu">
       <li class="menu-item active" id="menu-intro" onclick="switchMainTab('Intro')">
@@ -39,8 +45,13 @@
   <!-- --- MAIN WORKSPACE AREA --- -->
   <main class="main-content">
     <header class="app-header">
-      <div class="app-title" id="page-header-title">Introduction</div>
-      <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()">
+      <div class="header-left">
+        <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileSidebar(true)" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="app-title" id="page-header-title">Introduction</div>
+      </div>
+      <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Dark/Light Mode">
         <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         <span id="theme-text">Dark Mode</span>
       </button>

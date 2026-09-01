@@ -30,22 +30,39 @@ function drawRidgelinePlot(canvasId, isDarkTheme = false) {
   canvas.isDarkTheme = isDarkTheme;
   
   if (!canvas.hasIntroListener) {
-    canvas.addEventListener('mousemove', (e) => {
+    const handleMove = (clientX, clientY) => {
       const rect = canvas.getBoundingClientRect();
-      const mX = e.clientX - rect.left;
-      const mY = e.clientY - rect.top;
+      const mX = clientX - rect.left;
+      const mY = clientY - rect.top;
       
       canvas.hoverX = mX;
       canvas.hoverY = mY;
       canvas.isHovering = true;
       
       renderRidgelinePlotWithHover(canvas);
+    };
+
+    canvas.addEventListener('mousemove', (e) => {
+      handleMove(e.clientX, e.clientY);
     });
     
     canvas.addEventListener('mouseleave', () => {
       canvas.isHovering = false;
       renderRidgelinePlotWithHover(canvas);
     });
+
+    // Touch support for mobile devices
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
     
     canvas.hasIntroListener = true;
   }
@@ -61,6 +78,9 @@ function renderRidgelinePlotWithHover(canvas) {
   const height = 450; 
   const { ctx, width } = setupCanvas(canvas, height);
   
+  const isMobile = width < 600;
+  const isTiny = width < 420;
+
   // Modern Palette
   const textCol = isDarkTheme ? '#f1f5f9' : '#1e293b';
   const textMuted = isDarkTheme ? '#64748b' : '#94a3b8';
@@ -73,7 +93,12 @@ function renderRidgelinePlotWithHover(canvas) {
   ctx.fillStyle = bgCol;
   ctx.fillRect(0, 0, width, height);
   
-  const margin = { top: 60, right: 60, bottom: 75, left: 190 };
+  const margin = { 
+    top: isMobile ? 45 : 60, 
+    right: isTiny ? 20 : (isMobile ? 35 : 60), 
+    bottom: isMobile ? 65 : 75, 
+    left: isTiny ? 70 : (isMobile ? 120 : 190) 
+  };
   const plotWidth = width - margin.left - margin.right;
   const plotHeight = height - margin.top - margin.bottom;
   
@@ -108,7 +133,7 @@ function renderRidgelinePlotWithHover(canvas) {
   const normalPDF = (x, mean, sd) => Math.exp(-0.5 * ((x - mean) / sd) ** 2) / (sd * Math.sqrt(2 * Math.PI));
   
   const drawRidge = (mean, sd, yBase, label) => {
-    const scaleY = 180;
+    const scaleY = isMobile ? 150 : 180;
     const steps = 300;
     const q025 = mean - 1.96 * sd;
     const q05 = mean - 1.645 * sd;
@@ -158,10 +183,11 @@ function renderRidgelinePlotWithHover(canvas) {
     ctx.stroke();
     
     ctx.fillStyle = textCol;
-    ctx.font = `700 14px var(--font-title)`;
+    ctx.font = isMobile ? `700 11px var(--font-title)` : `700 14px var(--font-title)`;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText(label, margin.left - 20, yBase - 15);
+    const displayLabel = isTiny ? (label === "Inconclusive Outcome 1" ? "Outcome 1" : "Outcome 2") : label;
+    ctx.fillText(displayLabel, margin.left - (isTiny ? 8 : 14), yBase - 15);
   };
   
   drawRidge(5.5, 0.75, yRidge2, "Inconclusive Outcome 1");
@@ -188,7 +214,7 @@ function renderRidgelinePlotWithHover(canvas) {
     ctx.fill();
     
     const lines = text.split('\n');
-    ctx.font = `600 12px var(--font-body)`;
+    ctx.font = isMobile ? `600 10px var(--font-body)` : `600 12px var(--font-body)`;
     const textWidth = Math.max(ctx.measureText(lines[0]).width, ctx.measureText(lines[1]).width);
     
     ctx.fillStyle = isDarkTheme ? '#0f172a' : '#ffffff';
@@ -203,17 +229,19 @@ function renderRidgelinePlotWithHover(canvas) {
     ctx.restore();
   };
   
-  drawArrowAndText("Lower bound\nSESOI (-5)", sesoiLower, -2.5, yRidge2 - 40);
-  drawArrowAndText("Upper bound\nSESOI (5)", sesoiUpper, 2.5, yRidge2 - 40);
+  if (!isTiny) {
+    drawArrowAndText(isMobile ? "SESOI\n(-5)" : "Lower bound\nSESOI (-5)", sesoiLower, -2.5, yRidge2 - (isMobile ? 30 : 40));
+    drawArrowAndText(isMobile ? "SESOI\n(5)" : "Upper bound\nSESOI (5)", sesoiUpper, 2.5, yRidge2 - (isMobile ? 30 : 40));
+  }
   
   ctx.fillStyle = isDarkTheme ? '#34d399' : '#10b981';
-  ctx.font = `bold 12px var(--font-body)`;
+  ctx.font = isMobile ? `bold 10px var(--font-body)` : `bold 12px var(--font-body)`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText("90% CI", getX(7.5), yRidge2 - 25);
 
   ctx.fillStyle = isDarkTheme ? '#f87171' : '#ef4444';
-  ctx.font = `bold 12px var(--font-body)`;
+  ctx.font = isMobile ? `bold 10px var(--font-body)` : `bold 12px var(--font-body)`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText("95% CI", getX(7.5), yRidge2 - 10);
@@ -321,9 +349,14 @@ function renderRidgelinePlotWithHover(canvas) {
       `Equivalence (90% CI): ${isEquivalent ? "Equivalent" : "Inconclusive"}`
     ];
     
-    const tooltipWidth = 245;
+    const tooltipWidth = isTiny ? 205 : 240;
     const tooltipHeight = 125;
-    const tooltipX = mX + 15 + tooltipWidth > width ? mX - tooltipWidth - 15 : mX + 15;
+    let tooltipX = mX + 15;
+    if (tooltipX + tooltipWidth > width - 10) {
+      tooltipX = mX - tooltipWidth - 15;
+    }
+    if (tooltipX < 10) tooltipX = 10;
+    if (tooltipX + tooltipWidth > width - 10) tooltipX = width - tooltipWidth - 10;
     const tooltipY = mY - 30 < 15 ? 15 : (mY - 30 > height - tooltipHeight - 15 ? height - tooltipHeight - 15 : mY - 30);
     
     drawTooltipWithStatus(ctx, tooltipX, tooltipY, tooltipWidth, tooltipHeight, lines, outcomeColor, isDarkTheme);
@@ -423,14 +456,17 @@ function drawForestPlot(canvasId, studies, pooledResult, sesoiLower, sesoiUpper,
   
   const { ctx, width } = setupCanvas(canvas, height);
   
+  const isMobile = width < 650;
+  const isTiny = width < 450;
+  
   const textCol = isDarkTheme ? '#f1f5f9' : '#1e293b';
   const textMuted = isDarkTheme ? '#64748b' : '#94a3b8';
   const gridCol = isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
   const bgCol = isDarkTheme ? '#0f172a' : '#ffffff';
   
-  const leftMargin = Math.max(190, Math.min(250, Math.round(width * 0.23)));
-  const rightMargin = Math.max(210, Math.min(270, Math.round(width * 0.25)));
-  const margin = { top: 70, right: rightMargin, bottom: 65, left: leftMargin }; 
+  const leftMargin = isTiny ? 95 : (isMobile ? 135 : Math.max(190, Math.min(250, Math.round(width * 0.23))));
+  const rightMargin = isTiny ? 105 : (isMobile ? 150 : Math.max(210, Math.min(270, Math.round(width * 0.25))));
+  const margin = { top: isMobile ? 55 : 70, right: rightMargin, bottom: isMobile ? 55 : 65, left: leftMargin }; 
   const plotWidth = width - margin.left - margin.right;
   const plotHeight = height - margin.top - margin.bottom;
   
@@ -490,12 +526,12 @@ function drawForestPlot(canvasId, studies, pooledResult, sesoiLower, sesoiUpper,
   lastForestPlotCache = cache;
   
   if (!canvas.hasForestListener) {
-    canvas.addEventListener('mousemove', (e) => {
+    const handleForestMove = (clientX, clientY) => {
       if (!lastForestPlotCache) return;
       
       const rect = canvas.getBoundingClientRect();
-      const mX = (e.clientX - rect.left);
-      const mY = (e.clientY - rect.top);
+      const mX = clientX - rect.left;
+      const mY = clientY - rect.top;
       
       let hoveredIdx = -1;
       const kStudies = lastForestPlotCache.studies.length;
@@ -518,6 +554,10 @@ function drawForestPlot(canvasId, studies, pooledResult, sesoiLower, sesoiUpper,
       lastForestPlotCache.mouseY = mY;
       
       renderForestPlotFromCache(lastForestPlotCache);
+    };
+
+    canvas.addEventListener('mousemove', (e) => {
+      handleForestMove(e.clientX, e.clientY);
     });
     
     canvas.addEventListener('mouseleave', () => {
@@ -525,6 +565,19 @@ function drawForestPlot(canvasId, studies, pooledResult, sesoiLower, sesoiUpper,
       lastForestPlotCache.hoveredIndex = -1;
       renderForestPlotFromCache(lastForestPlotCache);
     });
+
+    // Touch support for mobile devices
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleForestMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleForestMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
     
     canvas.hasForestListener = true;
   }
@@ -542,6 +595,9 @@ function renderForestPlotFromCache(cache) {
   const ctx = canvas.getContext('2d');
   const { studies, pooledResult, sesoiLower, sesoiUpper, isDarkTheme, width, height, margin, rowHeight, plotWidth, plotHeight, xMin, xMax, getX } = cache;
   
+  const isMobile = width < 650;
+  const isTiny = width < 450;
+
   const textCol = isDarkTheme ? '#f1f5f9' : '#1e293b';
   const textMuted = isDarkTheme ? '#64748b' : '#94a3b8';
   const gridCol = isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
@@ -605,13 +661,13 @@ function renderForestPlotFromCache(cache) {
     ctx.lineTo(getX(val), margin.top + plotHeight + 5);
     ctx.stroke();
     
-    if (label) {
+    if (label && !isTiny) {
       ctx.setLineDash([]);
       ctx.fillStyle = isDarkTheme ? '#f87171' : '#dc2626';
       ctx.font = 'bold 9px var(--font-body)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(label, getX(val), margin.top - 12);
+      ctx.fillText(label, getX(val), margin.top - (isMobile ? 8 : 12));
     }
     ctx.restore();
   };
@@ -622,14 +678,14 @@ function renderForestPlotFromCache(cache) {
   
   // Column Headers
   ctx.fillStyle = textMuted;
-  ctx.font = `700 11px var(--font-title)`;
+  ctx.font = isMobile ? `700 9px var(--font-title)` : `700 11px var(--font-title)`;
   ctx.textBaseline = 'bottom';
   
   ctx.textAlign = 'left';
-  ctx.fillText("Study / Model", 25, margin.top - 15);
+  ctx.fillText("Study / Model", isTiny ? 8 : (isMobile ? 12 : 25), margin.top - (isMobile ? 8 : 15));
   
   ctx.textAlign = 'right';
-  ctx.fillText("Effect Size [95% CI]", width - 25, margin.top - 15);
+  ctx.fillText(isTiny ? "ES [95% CI]" : "Effect Size [95% CI]", width - (isTiny ? 8 : (isMobile ? 12 : 25)), margin.top - (isMobile ? 8 : 15));
   
   // Study rows
   ctx.fillStyle = textCol;
@@ -639,9 +695,9 @@ function renderForestPlotFromCache(cache) {
     
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.font = `bold 13px var(--font-title)`;
+    ctx.font = isMobile ? `bold 11px var(--font-title)` : `bold 13px var(--font-title)`;
     ctx.fillStyle = cache.hoveredIndex === idx ? '#3b82f6' : textCol;
-    ctx.fillText(s.name, 25, y, margin.left - 45);
+    ctx.fillText(s.name, isTiny ? 8 : (isMobile ? 12 : 25), y, margin.left - (isTiny ? 15 : (isMobile ? 20 : 45)));
     
     const ciLb = s.y - 1.96 * s.se;
     const ciUb = s.y + 1.96 * s.se;
@@ -675,9 +731,9 @@ function renderForestPlotFromCache(cache) {
     ctx.restore();
     
     ctx.fillStyle = textCol;
-    ctx.font = `500 13px var(--font-body)`;
+    ctx.font = isMobile ? `500 11px var(--font-body)` : `500 13px var(--font-body)`;
     ctx.textAlign = 'right';
-    ctx.fillText(`${s.y.toFixed(2)} [${ciLb.toFixed(2)}, ${ciUb.toFixed(2)}]`, width - 25, y);
+    ctx.fillText(`${s.y.toFixed(2)} [${ciLb.toFixed(2)}, ${ciUb.toFixed(2)}]`, width - (isTiny ? 8 : (isMobile ? 12 : 25)), y);
   });
   
   // Pooled estimate
@@ -685,10 +741,13 @@ function renderForestPlotFromCache(cache) {
     const y = margin.top + studies.length * rowHeight + 25;
     
     ctx.fillStyle = cache.hoveredIndex === -2 ? '#6366f1' : textCol;
-    ctx.font = `bold 13px var(--font-title)`;
+    ctx.font = isMobile ? `bold 11px var(--font-title)` : `bold 13px var(--font-title)`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(pooledResult.method === "FE" ? "Fixed-Effects Model" : "Random-Effects Model", 25, y, margin.left - 45);
+    const modelName = isTiny 
+      ? (pooledResult.method === "FE" ? "Fixed Effect" : "Random Effect") 
+      : (pooledResult.method === "FE" ? "Fixed-Effects Model" : "Random-Effects Model");
+    ctx.fillText(modelName, isTiny ? 8 : (isMobile ? 12 : 25), y, margin.left - (isTiny ? 15 : (isMobile ? 20 : 45)));
     
     const mean = pooledResult.beta;
     const lb = pooledResult.ci95Lower;
